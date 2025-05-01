@@ -1,0 +1,89 @@
+function [X, DegenSoln, DegenMatrix, IsolatedSoln] = LCP_enumerate(M,q)
+%
+% solve the linear complementarity problem (LCP) using an enumerative
+% approach that searches all 2^n possibilities
+%
+  X = [];
+  DegenSoln = [];
+  DegenMatrix = [];
+  IsolatedSoln = [];
+%
+  EPS = 1e-40;
+%
+% these tolerances are used to determine whether a matrix is nearly singular
+  EPS1 = 1e-10;
+  COND = 1/EPS1;
+%
+% these tolerances are used to determine whether complementary values are
+% positive
+  EPS2 = 1e-20;
+%
+  n = length(q);
+%
+  N = dec2bin(0:(2^n-1),2);
+  Ones = N=='1';
+%
+% search through all 2^n possible solutions
+  for r = 1:2^n
+%   construct the complementary matrix "Ar"
+    Ar = eye(n);
+    Indices = find(Ones(r,:));
+    Ar(:,Indices) = -M(:,Indices);
+%
+%   check whether the principal submatrix is ill-conditioned (nearly singular).
+%   Here, we take advantage of Octave able to compute both the inverse
+%   (nvAr) and the condition number of matrix Ar.  Matlab might not have this
+%   ability.  If Matlab is used, you might need to use the cond() function
+%   to find the condition number and the inv() function to find the inverse.
+    [invAr,RCOND] = inv(Ar);
+    if 1/RCOND <= COND   % the RCOND value is the reciprocal condition number
+      y = invAr*q;
+%
+%     a solution exists when all elements of "y" are non-negative
+      if all(y >= -EPS2)
+%
+%       the zero and non-negative "x" values
+        x = zeros(n,1);
+        x(Indices) = y(Indices);
+        X = [X x];
+%
+%       the solution is degenerate if any of the "y" values are zero
+        DegenSoln = [DegenSoln any(abs(y)<=EPS2)];
+%
+%       because the det(Ar) is not zero, the solution is isolated
+        IsolatedSoln = [IsolatedSoln 1];
+%
+%       degenerate solutions occurs as pairs.  Remove redundant ones
+        [Y,I,J] = unique(X','rows');
+        X = X(:,I);
+        DegenSoln = DegenSoln(I);
+        IsolatedSoln = IsolatedSoln(I);
+      end
+    else
+%     this principal submatrix has a zero determinant. Output the
+%     indices of the principal submatrix in "DegenMatrix" 
+      Degen = zeros(n,1);
+      Degen(Indices) = 1;
+      DegenMatrix = [DegenMatrix Degen];
+%
+%     currently, we only provide for a rank of Ar == n-1
+      if rank(Ar,EPS2)==(n-1)
+%       Octave/Matlab use a pseudo-inverse with singular matrices
+        y = Ar\q;
+%
+%       check whether the values of "y" are all of the same sign
+        if all(y>=-EPS2) || all(y<=EPS2)
+          x = zeros(n,1);
+          x(Indices) = y(Indices);
+          X = [X x];
+          DegenSoln = [DegenSoln any(y==0)];
+          IsolatedSoln = [IsolatedSoln 0];
+%
+          [Y,I,J] = unique(X','rows');
+          X = X(:,I);
+          DegenSoln = DegenSoln(I);
+          IsolatedSoln = IsolatedSoln(I);
+        end
+      end
+    end  % if 1/RCOND <= COND
+  end  % for r = 1:2^n

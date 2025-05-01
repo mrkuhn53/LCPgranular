@@ -1,0 +1,180 @@
+function [X, DegenSoln, IsolatedSoln, NonIsolated, ...
+          ColCompetent, DegenMatrix] = ...
+         LCP_enumerate(M,q)
+%
+% solve the linear complementarity problem (LCP) using an enumerative
+% approach that searches all 2^n possibilities to find all solutions
+% of the LCP:
+%   find "x" such that  M*x >= 0; x >=0; x'*(M*x) = 0
+%
+% Input: M = square matrix, nxn
+%        q = column vector, nx1
+%
+% Output: X =            matrix with columns x that are solutions of the LCP
+%                        Note that each column is unique, as redundant columns
+%                        are removed.
+%         DegenSoln =    row vector of 0s and 1s. A 0 means that the
+%                        corresponding solution in X is not a degenerate
+%                        solution. A 1 means that the corresponding solution 
+%                        is degenerate.
+%         IsolatedSoln = row vector of 0s and 1. A 1 means that the
+%                        corresponding solution in X is an isolated
+%                        solution.  A 2 means that the soltions is not
+%                        isolated.
+%         ColCompetent = 1 or 0, whether matrix M is column competent or not
+%         DegenMatrix =  if the matrix is non-degenerate, then the empty
+%                        matrix [] is assigned.  If M is degenerate, then
+%                        DegenMatrix is a matrix with n rows.  
+%                        The columns of DegenMatrix indicate the index
+%                        sets for which the principal minor is zero.
+%                        The index set is given by the rows of the
+%                        1's in a column.  A matrix M can be degenerate
+%                        with multiple prinicpal minors that are zero.
+%                        Hence, possible multiple columns in DegenMatrix.
+%         NonIsolated =  matrix of directions in which non-isolated solutions
+%                        (like a polygonal edge) emanate from the solutions 
+%                        in matrix X.  NonIsolated has n rows, and one column
+%                        for each solution.  A column is filled with zeros, 
+%                        if the solution is isolated.  Otherwise, the column
+%                        contains a unit vector of the direction of the null
+%                        space of the complemenary matrix, giving the
+%                        direction "z" of solutions near to "x": x + eps*z.
+%                        Note that the code only handles complemenary 
+%                        matrices with a rank of n-1, not less.
+%
+% Limitation: for degenerate matrices, we currently are limited to cases
+% in which complementary matrices are of rank n-1.
+%
+% Method: we use the method described my Murty and Yu, page 8:
+%   Katta G. Murty and Feng-Tien Yu, Linear Complementarity: Linear and
+%   Nonlinear Programming, Internet edition, 1997.
+%
+%   Murty, Katta G. "On the number of solutions to the complementarity 
+%   problem and spanning properties of complementary cones." Linear 
+%   Algebra and its Applications 5.1 (1972): 65-108.
+%
+% Limitation: the implementation time is of order 2^n, so large problems 
+% (say, n>15) are intractable.  If you only need a single solution of a
+% multi-solution LCP, or if you are sure that the LCP has only a single
+% solution (for example, if M is a P-matrix), then there are several other
+% Matlab/Octave codes that will solve the problem more efficiently than
+% this function.  I suggest trying qp() or quadprog() in Octave, or 
+% quadprog in Matlab.
+%
+  X = [];
+  DegenSoln = [];
+  DegenMatrix = [];
+  IsolatedSoln = [];
+  NonIsolated = [];
+%
+% these tolerances are used to determine whether a matrix is nearly singular
+  EPS1 = 1e-8;
+  COND = 1/EPS1;
+%
+% this tolerance is used to determine whether complementary values are
+% positive
+  EPS2 = 1e-12;
+%
+  n = length(q);
+%
+  N = dec2bin(0:(2^n-1),2);
+  Ones = N=='1';
+%
+% matrix is column competent unless proven otherwise
+  ColCompetent = 1;
+%
+% search through all 2^n possible solutions
+  for r = 1:2^n
+%   construct the complementary matrix "Ar"
+    Ar = eye(n);
+    Indices = find(Ones(r,:));
+%   CompIndices = setdiff([1:n], Indices);
+    Ar(:,Indices) = -M(:,Indices);
+%
+%   check whether the principal submatrix is ill-conditioned (nearly singular).
+%   Here, we take advantage of Octave able to compute both the inverse
+%   (nvAr) and the condition number of matrix Ar.  Matlab might not have this
+%   ability.  If Matlab is used, you might need to use the cond() function
+%   to find the condition number and the inv() function to find the inverse.
+    [invAr,RCOND] = inv(Ar);
+    if 1/RCOND <= COND   
+%     the RCOND value is the reciprocal condition number.  In this case,
+%     matrix Ar is non-singular and the corresponding principal submatrix
+%     has a non-zero determinant
+
+%     solve matrix equation for a trial vector
+      y = invAr*q;
+%
+%     a solution exists when all elements of "y" are non-negative
+      if all(y >= -EPS2)
+%
+%       the zero and non-negative "x" values
+        x = zeros(n,1);
+        x(Indices) = y(Indices);
+%
+%       append the solution "x" to the other solutions
+        X = [X x];
+%
+%       the solution is degenerate if any of the "y" values are zero
+        DegenSoln = [DegenSoln any(abs(y)<=EPS2)];
+%
+%       because the det(Ar) is not zero, the solution is isolated
+        IsolatedSoln = [IsolatedSoln 1];
+%
+%       an isolated solution
+        NonIsolated = [NonIsolated, zeros(n,1)];
+      end
+    else
+%     the corresponding principal submatrix of M has a zero determinant. Output 
+%     the indices of the principal submatrix in "DegenMatrix" 
+      Degen = zeros(n,1);
+      Degen(Indices) = 1;
+      DegenMatrix = [DegenMatrix Degen];
+%
+%     determine whether matrix M is column competent using Theorem 2.5 of 
+%     Song Xu, "On local w-uniqueness of solutions to linear complementarity
+%     problem," Linear Algebra and its Applications, 1999, 290:23-29.
+      ColCompetent = ColCompetent && rank(M(:,Indices),EPS1) < length(Indices);
+%
+%     currently, we only provide for a rank of Ar == n-1
+      if rank(Ar,EPS1)==(n-1)
+%       Octave/Matlab use a pseudo-inverse with singular matrices
+        y = Ar\q;
+%
+        if all(y>=-EPS2) || all(y<=EPS2)
+          x = zeros(n,1);
+          x(Indices) = y(Indices);
+          X = [X x];
+          DegenSoln = [DegenSoln any(y==0)];
+%
+%         direction of potential solutions from the base solution x. Note
+%         that the null space does not include the columns of Ar that are
+%         taken from the identity matrix
+          z = null(Ar);
+%
+%         we will probe to find whether the solution is isolated. Find a
+%         suitable small size for the probe
+          if norm(x)>100*EPS2
+            ProbeLength = 1000*EPS2;
+          else
+            ProbeLength = 100*EPS2;
+          end
+%
+          zPossible = [z -z];
+          Probe = x + ProbeLength*zPossible;
+          dw = M*Probe + q*ones(1,size(zPossible,2));
+%
+          if all(abs(dw) < EPS2)
+            IsolatedSoln = [IsolatedSoln 0];
+            NonIsolated = [NonIsolated, zPossible(:,find(abs(dw) < EPS2)(1))];
+          else
+            IsolatedSoln = [IsolatedSoln 1];
+            NonIsolated = [NonIsolated, zeros(n,1)];
+          end
+        end
+      else
+        disp('Oops! A complemntary matrix has a rank less than n-1.')
+        disp('The current code does not handle this situation.')
+      end % if rank(Ar,EPS1)==(n-1)
+    end  % if 1/RCOND <= COND
+  end  % for r = 1:2^n

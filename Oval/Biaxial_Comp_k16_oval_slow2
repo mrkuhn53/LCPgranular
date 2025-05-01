@@ -1,0 +1,41 @@
+Prototype RunFile for the DEM program Oval
+       1         : algori   | the algorithm for advancing the particle positions (1 or 2)
+       1         : ivers    | add extra input lines (3 or 4)
+       0         : ncownt   | * Only_Fast_Method: use only slow (non-enumerative) method
+       0         : iout(2)  | * Type_Constraint: type of displacement constraints
+       0         : iout(3)  | * Min_Coord_No: min. number contacts for particles to be included
+       1         : istart   | type of file defining the initial configuration (1, 2, or 3)
+       0         : iend     | type of file to be created at end of the run (0, 1, 2, or 3)
+       0         : idef     | reference configuration for reporting deformations (0)
+    2000         : iupdtm   | max. no. of time steps between linked-list updates
+       2         : icirct   | * Max_Repetitions: max repetitions during corrective action
+       0         : imodel   | model for long-range particle interactions
+       0         : nplatn   | * M_lambda_max_enumerate: max M_lambda for enermative method
+       0         : nloop1   | * if_Inst_Output: whether to conduct and output instab. analysis
+     2.          : k        | normal contact stiffness (force/indentation)
+     1.          : alpha    | ratio of tangential/normal contact stiffnesses
+     0.50        : mu       | coefficient of friction at particle contacts
+     0.          : frictw   | coefficient of friction between particles and wall
+     0.          : rho      | the mass density of the particle material
+     0.40        : sep      | * Sep: threshold separation during the near-neighbor searches
+     0.03        : pcrit(1) | * lambda_tolerance: tolerance on whether a contact is sliding
+     0.05        : pcrit(2) | * Max_stress_deviation: max deviation to trigger corrective action
+     0.          : pcrit(3) | * Max_b_p: max avg. force imbalance to trigger corrective action
+     0.          : xseed    | * K_walls: spring stiffness for periodic walls
+     0.          : rmsvel   | * lambda_threshold: max lambda allowed
+     0.          : pdif     | parameter for reducing Jager memory demand (when imodel=6)
+     0.          : tmax     | maximum time for the simulation run
+     0.          : A_1      | shape factor for conical contact profile (A_1)
+     0.          : dt       | time increment
+                                                                                         imicro
+       ************  Deformation-Stress Path Segments  **********   krotat           iflexc |             iplot
+        (100000)   (10000)   (1000)    (100)      (10)      (1)       |            idump  | |ibodyf    ipts2 |
+icontr| rate_11 | rate_22 | rate_33 | rate_12 | rate_13 | rate_23 igoal   finalv  ipts |  | | |  defdot  |   |
+------|---------|---------|---------|---------|---------|---------|--|-|---------|----|-|--|-|--|------|----|--|
+000000  0.000e+0  0.000e+0  0.000e+0  0.000e+0  0.000e+0  0.000e+0 70 0    100.e3 5000 0  0 0  0     0.    0  0
+010000 -1.00e-09  0.000e+0  0.000e+0  0.000e+0  0.000e+0  0.000e+0 70 0  10000.e3 5000 0  0 0  0     0.    0  0
+010000 -0.50e-09  0.000e+0  0.000e+0  0.000e+0  0.000e+0  0.000e+0 70 0  13600.e3 5000 0  0 0  0     0.    0  0
+010000 -1.00e-09  0.000e+0  0.000e+0  0.000e+0  0.000e+0  0.000e+0 70 0  15950.e3 5000 0  0 0  0     0.    0  0
+010000 -1.00e-09  0.000e+0  0.000e+0  0.000e+0  0.000e+0  0.000e+0 70 0  10700.e3 5000 0  0 0  0     0.    0  0
+010000 -0.40e-09  0.000e+0  0.000e+0  0.000e+0  0.000e+0  0.000e+0 70 0   1500.e3 5000 0  0 0  0     0.    0  0
+010000 -1.00e-09  0.000e+0  0.000e+0  0.000e+0  0.000e+0  0.000e+0 70 0    500.e3 5000 0  0 0  0     0.    0  0

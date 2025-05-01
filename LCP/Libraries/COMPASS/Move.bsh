@@ -1,0 +1,19 @@
+#!/bin/bash
+#
+mv check_niceness_Kuhn.m check_niceness_func.m
+mv COMPASS_Kuhn.m COMPASS_func.m
+mv crash_Kuhn.m crash_func.m
+mv d_step_Kuhn.m d_step_func.m
+mv get_min_vec_Kuhn.m get_min_vec_func.m
+mv majoriter_Kuhn.m majoriter_func.m
+mv minoriter_Kuhn.m minoriter_func.m
+mv m_step_Kuhn.m m_step_func.m
+mv NMS_Kuhn.m NMS_func.m
+mv pg_step_Kuhn.m pg_step_func.m
+mv pivotinit_Kuhn.m pivotinit_func.m
+mv pivotloop_Kuhn.m pivotloop_func.m
+mv pivotupdate_Kuhn.m pivotupdate_func.m
+mv prevent_move_Kuhn.m prevent_move_func.m
+mv rankdef_Kuhn.m rankdef_func.m
+mv RestartCOMPASS_Kuhn.m RestartCOMPASS_func.m
+mv watchdog_step_Kuhn.m watchdog_step_func.m

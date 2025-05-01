@@ -1,0 +1,6 @@
+https://github.com/haraldschilly/compass-solver-matlab
+
+And, the report:
+Schmelzer2012a.pdf
+
+

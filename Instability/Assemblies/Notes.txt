@@ -1,0 +1,16 @@
+Assemblies are from the house computer:
+~/SSHFS/Scatter/Assemblies_49_a/Dcircls_49_a-38
+~/SSHFS/Scatter/Assemblies_49_a/Dcircls_49_a-39
+~/SSHFS/Scatter/Assemblies_64_a/Dcircls_64_a-1
+~/SSHFS/Scatter/Assemblies_64_a/Dcircls_64_a-16
+~/SSHFS/Scatter/Assemblies_256_b/Dcircls_256_b-18
+~/SSHFS/Scatter/Assemblies_256_b/Dcircls_256_b-42
+~/SSHFS/Scatter/Assemblies_256_b/Dcircls_256_b-48
+~/SSHFS/Scatter/Assemblies_256_a/Dcircls_256_a-100
+~/SSHFS/Bending_data/Nobbies-256-5-0.7-0.01-a/DNobbies-256-5-0.7-0.01-a-100
+~/SSHFS/Assemblies3/Spheres-512-a/DSpheres-512-a-3
+~/SSHFS/Assemblies3/Spheres-512-a/DSpheres-512-a-18
+~/SSHFS/Assemblies3/Spheres-512-a/DSpheres-512-a-20
+~/SSHFS/Assemblies3/Spheres-512-c/DSpheres-512-c-3
+~/SSHFS/Assemblies3/Spheres-4096-c/DSpheres-4096-c-1
+~/SSHFS/NSF/Simulations2/Dfiles/DCreate_Dfile_Isotropic_c_10kPa-Bumpies-6400-6-060-08-074_File_11
